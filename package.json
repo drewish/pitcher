@@ -3,15 +3,12 @@
   "version": "0.0.0",
   "description": "MIDI pitch training",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": "",
   "author": "andrew morton <drewish@katherinehouse.com>",
   "license": "BSD",
   "dependencies": {
-    "coremidi": "~0.1.1",
     "midi-api": "~0.2.0",
-    "midi": "git+https://github.com/drewish/node-midi.git"
+    "midi": "git+https://github.com/drewish/node-midi.git",
+    "lodash": "~2.4.1"
   }
 }

@@ -1,3 +1,5 @@
+var Lesson = require('./lesson');
+
 var m = require('midi');
 
 // Set up a new input.
@@ -11,32 +13,34 @@ output.openPort(0);
 var midi = require('midi-api')({ end: false });
 midi.pipe(m.createWriteStream(output));
 
-// This is the range of my keyboard
-var notes = [36, 48, 60, 72, 84, 96];
+
+var lesson = new Lesson();
 var note;
 var streak = 0;
+
 
 // Start state
 pick();
 
-function pick() {
-  var index;
-  // Don't give them the same note two times in a row.
-  do {
-    index = Math.floor(Math.random() * notes.length);
-  } while (note == notes[index]);
-  note = notes[index];
+// This is roughtly setup as a state machine with each function being a state.
+// Timeouts and MIDI events are used to transition between the states.
 
+// Pick a new note, then we'll play it.
+function pick() {
+  note = lesson.next();
   console.log("note:", note, "streak:", streak);
   setTimeout(play, 250);
 }
 
+// Play the note, then we'll wait for them.
 function play() {
   midi.noteOn(note).rest(500).noteOff(note);
-  // Let them start a little early if they know it.
-  setTimeout(wait, 250);
+  // Let them guess while it's still playing.
+  setTimeout(wait, 100);
 }
 
+// Wait for a guess, mark it as right or wrong and if we wait too long let's
+// play the note again.
 function wait() {
   var timeout;
 
@@ -69,30 +73,38 @@ function wait() {
   timeout = setTimeout(timedout, 5000);
 }
 
+// They got it right, give feedback then pick another note.
 function right() {
+  lesson.right();
   streak += 1;
 
   midi
     .noteOn(note)
-    .noteOn(note + 4)
-    .noteOn(note - 3)
-    .rest(100)
+    // .rest(25)
+    // .noteOn(note + 4)
+    // .noteOn(note - 3)
+    .rest(400)
     .noteOff()
     ;
-
   setTimeout(pick, 500);
 }
 
+// They were wrong, give feed back then play it again.
 function wrong(picked) {
+  lesson.wrong(picked);
   streak = 0;
 
   midi
     .noteOn(picked)
+    //  .rest(100)
     .noteOn(picked + 1)
     .noteOn(picked - 1)
-    .rest(250)
-    .noteOff()
+    .rest(50)
+    .noteOff(picked + 1)
+    .noteOff(picked - 1)
+    .rest(500)
+    .noteOff(picked)
     ;
 
-  setTimeout(play, 500);
+  setTimeout(play, 1000);
 }
