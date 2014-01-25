@@ -8,7 +8,7 @@
   "license": "BSD",
   "dependencies": {
     "midi-api": "~0.2.0",
-    "midi": "git+https://github.com/drewish/node-midi.git",
+    "midi": "0.7.1",
     "lodash": "~2.4.1"
   }
 }
